@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>信託傳承闖關</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap">
+<style>
+/* Layout concept: 一張像契約用印的闖關護照。上方是階級與經驗值，中間是六個蓋章關卡，下方是練習場。 */
+:root{
+  --bg:#EDF1F3; --surface:#FFFFFF; --ink:#16222E; --muted:#566574; --line:#D2DBE1; --soft:#E2E9EE;
+  --accent:#1F4E79; --accent-ink:#FFFFFF; --seal:#B8322A; --seal-bg:#FBE9E7;
+  --jade:#1B7556; --jade-bg:#E3F3EC; --gold:#9A6B0E;
+  --f-display:"Noto Serif TC","Songti TC","PMingLiU","Noto Serif CJK TC",serif;
+  --f-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1822; --surface:#162330; --ink:#E6EDF3; --muted:#93A4B3; --line:#263646; --soft:#1E2E3D;
+    --accent:#6FA8D6; --accent-ink:#0B1620; --seal:#E2625A; --seal-bg:#3A1B19;
+    --jade:#4FC29A; --jade-bg:#12342A; --gold:#E0B85A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1822; --surface:#162330; --ink:#E6EDF3; --muted:#93A4B3; --line:#263646; --soft:#1E2E3D;
+  --accent:#6FA8D6; --accent-ink:#0B1620; --seal:#E2625A; --seal-bg:#3A1B19;
+  --jade:#4FC29A; --jade-bg:#12342A; --gold:#E0B85A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7;
+  padding-block:0 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:880px;margin-inline:auto}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.3}
+p{margin:0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:16px;border-bottom:1px solid var(--line)}
+.brand{background:none;border:0;padding:0;cursor:pointer;font-family:var(--f-display);font-weight:900;font-size:19px;letter-spacing:.04em;display:flex;align-items:center;gap:10px}
+.brand .mini{width:26px;height:26px;border:2px solid var(--seal);color:var(--seal);border-radius:50%;display:grid;place-items:center;font-size:13px;transform:rotate(-8deg)}
+.chip{font-size:13px;color:var(--muted);white-space:nowrap}
+.chip b{color:var(--ink);font-weight:700}
+.hero{display:flex;gap:24px;align-items:center;justify-content:space-between;padding-block:36px 28px}
+.hero-txt{min-width:0;flex:1}
+.eyebrow{font-size:13px;letter-spacing:.14em;color:var(--muted);margin-bottom:8px}
+.hero h1{font-size:clamp(40px,9vw,64px);font-weight:900;letter-spacing:.06em}
+.lead{margin-top:12px;max-width:34em;color:var(--muted)}
+.hero-seal{flex:none;width:104px;height:104px;border:4px solid var(--seal);color:var(--seal);border-radius:50%;display:grid;place-items:center;
+  font-family:var(--f-display);font-weight:900;font-size:34px;line-height:1.15;text-align:center;transform:rotate(-9deg);opacity:.9}
+.xp{margin-top:20px;max-width:420px}
+.xp-row{display:flex;justify-content:space-between;gap:12px;font-size:14px;margin-bottom:6px;flex-wrap:wrap}
+.xp-row span{color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:8px;background:var(--soft);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:4px;transition:width .35s ease}
+.sec{font-size:22px;margin:28px 0 14px;display:flex;align-items:baseline;gap:12px}
+.sec small{font-family:var(--f-body);font-size:13px;color:var(--muted);font-weight:400}
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.station{display:flex;gap:16px;align-items:center;text-align:left;width:100%;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;cursor:pointer;transition:transform .15s,border-color .15s}
+.station:hover{transform:translateY(-2px);border-color:var(--accent)}
+.seal{flex:none;width:58px;height:58px;border:3px dashed var(--line);color:var(--line);border-radius:50%;display:grid;place-items:center;
+  font-family:var(--f-display);font-weight:900;font-size:26px;transform:rotate(-8deg)}
+.seal.earned{border:3px solid var(--seal);color:var(--seal)}
+.st-body{min-width:0}
+.st-part{font-size:12px;letter-spacing:.1em;color:var(--muted)}
+.st-name{font-family:var(--f-display);font-weight:700;font-size:18px;line-height:1.35}
+.st-meta{font-size:13px;color:var(--muted);margin-top:2px}
+.stars{color:var(--gold);letter-spacing:2px;font-size:15px}
+.drills{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.drill{display:block;width:100%;text-align:left;padding:18px;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:8px;cursor:pointer}
+.drill:hover{border-color:var(--accent)}
+.drill h3{font-size:18px;margin-bottom:4px}
+.drill p{font-size:14px;color:var(--muted)}
+.note{margin-top:32px;font-size:13px;color:var(--muted);max-width:44em}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 22px;background:var(--accent);color:var(--accent-ink);border:0;border-radius:6px;font-weight:700;cursor:pointer;min-height:44px}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:default}
+.link{background:none;border:0;padding:6px 0;color:var(--muted);cursor:pointer;font-size:14px}
+.link:hover{color:var(--ink)}
+.qhead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:18px 10px;flex-wrap:wrap}
+.qmeta{display:flex;gap:14px;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.hud{font-size:15px;white-space:nowrap}
+.hud .hearts{color:var(--seal);letter-spacing:2px}
+.hud .streak{margin-left:10px;color:var(--gold);font-weight:700}
+.qcard{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:clamp(18px,4vw,30px)}
+.qtag{font-size:12px;letter-spacing:.12em;color:var(--accent);font-weight:700;margin-bottom:8px}
+.q{font-size:clamp(19px,3.4vw,24px);font-weight:700;margin-bottom:20px}
+.opts{display:grid;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:13px 15px;border:1.5px solid var(--line);background:var(--surface);border-radius:6px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt .k{flex:none;width:26px;height:26px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-size:12px;font-weight:700;margin-top:1px}
+.opt span:last-child{min-width:0}
+.opt.right{border-color:var(--jade);background:var(--jade-bg)}
+.opt.bad{border-color:var(--seal);background:var(--seal-bg)}
+.opt:disabled{cursor:default;color:inherit}
+.fb{margin-top:20px;padding:16px 18px;border-radius:6px;border-left:5px solid var(--jade);background:var(--jade-bg)}
+.fb.bad{border-left-color:var(--seal);background:var(--seal-bg)}
+.fb strong{display:block;margin-bottom:4px}
+.fb p{font-size:15px}
+.fb .btn{margin-top:14px}
+.match{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.mcol{display:grid;gap:10px;align-content:start;min-width:0}
+.mbtn{width:100%;text-align:left;padding:11px 13px;border:1.5px solid var(--line);background:var(--surface);border-radius:6px;cursor:pointer;font-size:15px;line-height:1.5}
+.mbtn.sel{border-color:var(--accent);background:var(--soft)}
+.mbtn.done{border-color:var(--jade);background:var(--jade-bg);cursor:default;color:inherit}
+.mbtn.bad{border-color:var(--seal);background:var(--seal-bg);animation:shake .35s}
+.hint{font-size:13px;color:var(--muted);margin-top:12px}
+.numrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.num{width:180px;max-width:100%;padding:11px 14px;font:inherit;font-size:20px;font-variant-numeric:tabular-nums;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.unit{color:var(--muted)}
+.steps{margin:10px 0 0;padding-left:20px;font-size:15px}
+.steps li{margin-bottom:2px;font-variant-numeric:tabular-nums}
+.result{text-align:center;padding-block:36px 8px}
+.stamp{width:132px;height:132px;margin:0 auto 18px;border:5px solid var(--seal);color:var(--seal);border-radius:50%;display:grid;place-items:center;
+  font-family:var(--f-display);font-weight:900;font-size:52px;animation:stamp .5s cubic-bezier(.2,1.4,.4,1) both}
+.stamp.fail{border-style:dashed;color:var(--muted);border-color:var(--line);animation:none;transform:rotate(-6deg)}
+.result h2{font-size:30px}
+.result .stars{font-size:28px;margin:6px 0}
+.sum{color:var(--muted);margin-top:8px}
+.acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.review{margin-top:28px;text-align:left}
+.review h3{font-size:17px;margin-bottom:10px}
+.rv{padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--seal);border-radius:6px;margin-bottom:8px;font-size:14px}
+.rv b{display:block;font-weight:500;margin-bottom:2px}
+.rv span{color:var(--jade);font-weight:700}
+details.ref{margin-top:16px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:12px 16px;font-size:14px}
+details.ref summary{cursor:pointer;font-weight:700}
+.tbl{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;min-width:360px}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--muted);font-weight:500}
+.flash{display:block;width:100%;min-height:230px;padding:28px;background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:8px;cursor:pointer;text-align:center;display:grid;place-items:center}
+.flash .side{font-size:12px;letter-spacing:.14em;color:var(--muted);margin-bottom:10px}
+.flash .txt{font-family:var(--f-display);font-weight:700;font-size:clamp(20px,4vw,28px);line-height:1.5}
+.flash.back .txt{font-family:var(--f-body);font-size:clamp(17px,3vw,21px);font-weight:500}
+.cardnav{display:flex;gap:10px;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap}
+.cardnav .mid{display:flex;gap:10px;flex-wrap:wrap}
+.empty{padding:36px 20px;text-align:center;background:var(--surface);border:1px dashed var(--line);border-radius:8px;color:var(--muted);margin-top:18px}
+@keyframes stamp{from{transform:scale(1.9) rotate(-22deg);opacity:0}to{transform:scale(1) rotate(-9deg);opacity:1}}
+@keyframes shake{20%{transform:translateX(-5px)}60%{transform:translateX(5px)}100%{transform:none}}
+@media (max-width:520px){
+  .hero{flex-direction:column-reverse;align-items:flex-start;gap:12px;padding-block:24px 18px}
+  .hero-seal{width:76px;height:76px;font-size:24px;border-width:3px}
+  .match{gap:8px}
+  .mbtn{font-size:14px;padding:10px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <button class="brand" data-act="home" type="button"><span class="mini" aria-hidden="true">信</span>信託傳承闖關</button>
+    <span class="chip" id="topchip"></span>
+  </header>
+  <main id="app"></main>
+</div>
+
+<script>
+(function(){
+'use strict';
+var KEY='trust-quest-v1';
+var $=function(s){return document.querySelector(s)};
+var app=$('#app');
+var shuffle=function(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a};
+var pick=function(a){return a[Math.floor(Math.random()*a.length)]};
+var S={xp:0,stars:{},wrong:[],known:[],calcBest:0,played:0};
+try{var raw=localStorage.getItem(KEY);if(raw){S=Object.assign(S,JSON.parse(raw))}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* ---------- 題庫 ---------- */
+function mc(q,a,w,e){return{t:'mc',q:q,a:a,w:w,e:e}}
+function tf(q,a,e){return{t:'tf',q:q,a:a,e:e}}
+function mt(q,p,e){return{t:'match',q:q,p:p,e:e}}
+function nm(q,a,u,e,tol){return{t:'num',q:q,a:a,u:u,e:e,tol:tol||0}}
+
+var LEVELS=[
+{id:1,part:'第一部分',name:'信託基本概念',src:'信託法',seal:'信',qs:[
+ mc('受託人管理信託財產時，是以誰的名義處理？','受託人自己的名義',['委託人的名義','受益人的名義','信託監察人的名義'],'受託人是形式所有權人，以自己名義管理、處分信託財產。委託人才是實質所有權人。'),
+ mc('下列何者不是信託的「三大確定性」？','受託人必須是信託業',['信託目的須確定或可得確定','信託財產須獨立且範圍明確','受益人須確定或可得確定'],'三確定指目的、財產、受益人，缺一則信託行為無效。受託人可以是信託業，也可以是自然人。'),
+ tf('受益人必須是「特定」且「現時存在」的人，信託才有效。',false,'受益人只需確定或可得確定，有範圍、條件或標準即可，胎兒也可以（例如「業績最佳前 30 名」）。'),
+ mc('遺囑信託在什麼時點成立、什麼時點生效？','寫完遺囑時成立，死亡時生效',['死亡時成立，死亡時生效','寫完遺囑時成立，寫完時生效','死亡時成立，遺產分割時生效'],'遺囑信託是單方行為，所以立完遺囑就成立，但要到立遺囑人死亡才生效。'),
+ mc('講義列出的設立方式中，哪一種註明「公益信託可採用」？','宣言信託',['契約信託','遺囑信託','法定信託'],'設立方式有契約、遺囑、宣言、法定四種。契約是雙方行為，法定信託依信託法或特別法而成立。'),
+ mc('受託人破產時，信託財產會怎麼處理？','不屬於受託人的破產財團',['全部納入破產財團','由受託人的債權人按比例分配','自動歸屬受益人所有'],'§11：受託人破產時信託財產不屬其破產財團；§10：受託人死亡時信託財產也不屬其遺產。這就是信託財產的獨立性。'),
+ mc('房屋出租後取得的租金，在法律上屬於什麼？','信託財產',['受託人的自有財產','受益人直接取得的財產','委託人的其他財產'],'§9 同一性（物上代位）：管理、處分、滅失、毀損所得之財產仍屬信託財產，例如租金、出售價金、火災保險給付。'),
+ mc('以不動產設立信託，卻沒有辦理信託登記，會有什麼結果？','不得對抗第三人',['信託自始無效','信託自動變成自益信託','受託人須負刑事責任'],'§4 信託公示：應登記的財產權，非經信託登記不得對抗第三人。土地則須先辦移轉登記，否則財產權未移轉，信託不生效力。'),
+ tf('他益信託成立後，委託人原則上可以隨時變更受益人或終止信託。',false,'§3：除信託行為另有保留，或經受益人同意外，委託人不得變更受益人、終止信託，也不得處分受益人的權利。'),
+ mc('下列何者屬於信託行為無效的情形（§5）？','以進行訴願或訴訟為主要目的',['以未成年子女為受益人','以不動產為信託財產','委託人與受益人為同一人'],'§5 四種無效：違反強制禁止規定、違反公序良俗、以訴願訴訟為主要目的、以依法不得受讓特定財產權之人為受益人。'),
+ mc('信託成立後 6 個月內，委託人被宣告破產，法律如何看待該信託行為？','推定有害及債權',['推定有效且不得撤銷','一律無效','須經受益人同意才可撤銷'],'§6：信託行為有害委託人的債權人時，債權人得聲請法院撤銷，不影響善意受益人已取得的利益。'),
+ mt('配對信託角色與定義',[['委託人','設定信託的人，實質所有權人'],['受託人','形式所有權人，管理處分信託財產'],['受益人','享受信託利益的人'],['信託監察人','監督受託人，保障受益人權利']],'公益信託必須設置信託監察人。受託人與信託監察人都不得由未成年人、受監護或輔助宣告之人及破產人擔任。'),
+ mt('配對受託人義務與條文',[['分別管理義務','§24'],['自己處理義務','§25'],['備置文件義務','§31'],['忠實義務','§34、§35']],'善管注意義務在 §22、§23。忠實義務是只能為受益人的利益辦理信託，不得為自己或第三人謀利。'),
+ mc('下列何者不得擔任受託人？','受輔助宣告之人',['已成年且有行為能力的自然人','信託業','兼營信託業務的銀行'],'未成年人、受監護或輔助宣告之人及破產人，不得為受託人。'),
+ mc('信託財產原則上不得強制執行（§12），下列何者是例外？','信託前已存在於該財產上的權利',['受託人個人債權人的債權','委託人一般債權人的債權','受益人一般債權人的債權'],'例外有三：信託前存在於該財產的權利、因處理信託事務所生的權利、其他法律另有規定。')
+]},
+{id:2,part:'第二部分',name:'信託業法',src:'信託業法',seal:'業',qs:[
+ mc('下列何者不是講義所列的信託業類型？','保險公司',['兼營信託業務之銀行','兼營信託業務之證券商','兼營信託業務之證券投信投顧事業'],'信託業包括信託公司（§2），以及兼營信託業務的銀行、證券投信投顧事業、證券商（§3，後兩者得辦特定項目信託業務）。'),
+ mc('信託業擔任「遺囑執行人」，屬於哪一類業務？','附屬業務（§17），非信託關係',['信託業務（§16）','信託業不得辦理的業務','必須另設公司才能辦理的業務'],'§17 附屬業務適用非信託關係，如委任、代理，包括遺囑執行人、遺產管理人、信託監察人、保管業務與保管箱出租。'),
+ mc('下列何者信託業不得辦理？','存款與授信',['擔任信託監察人','辦理保管業務','出租保管箱'],'信託業不得辦理存款、授信、投資、匯兌、信用卡等銀行業務。'),
+ nm('§16 列舉的信託業務共有幾種？（含「其他財產權之信託」）',10,'種','金錢、金錢債權及擔保物權、有價證券、動產、不動產、租賃權、地上權、專利權、著作權、其他財產權，共 10 種。'),
+ mc('信託業與利害關係人的「自易行為」，哪一條是絕對禁止？','§25',['§27','§26','§31'],'§25 絕對禁止，§27 是相對限制（有例外）。§7 定義利害關係人，包括董事（長）、監察人、總經理、經理等。'),
+ mc('委託人指示「股票 50%、基金 40%、定存 10%」，這是哪一種金錢信託？','指定金錢信託',['特定金錢信託','不指定金錢信託','公益信託'],'指定＝概括指示營運範圍及方法。特定＝具體指示全部；不指定＝完全未指示。'),
+ mc('委託人具體指示投資標的、運用方法、運用時期、運用條件與運用金額，這是哪一種？','特定金錢信託',['指定金錢信託','不指定金錢信託','集合管理運用'],'特定金錢信託由委託人具體指示所有營運範圍及方法，受託人沒有運用決定權。'),
+ mc('下列何者不是特定金錢信託的指示五要素？','受益人人數',['運用時期','運用條件','運用金額'],'五要素是投資標的、運用方法、運用時期、運用條件、運用金額。'),
+ tf('「無運用決定權」的信託，指的就是特定金錢信託。',true,'細則§7：受託人有運用決定權（委託人指定或不指定範圍）vs 無運用決定權（＝特定，委託人具體指示）。'),
+ tf('信託業辦理不具運用決定權的信託，仍須受信託業法§25 第一項限制。',false,'信託業辦理不具運用決定權之信託，不受信託業法§25 第一項的限制。'),
+ mc('高收益債券型基金，須有 60% 投資於哪類標的？','信用評等未達 BBB- 的政府債券、金融債券及公司債',['新興市場國家債券','信用評等 AAA 的政府公債','國內上市股票'],'新興市場國家債券型基金則是 60% 投資新興市場國家債券，並得投資高收益債券。'),
+ mc('信託 3.0 的三大目標是什麼？','創新、普惠、永續',['創新、獲利、成長','普惠、安全、效率','永續、數位、國際化'],'信託 3.0 於 2025/1/1 啟動，另有六大策略，包括創新信託服務、運用數位技術、培育跨領域信託人才等。'),
+ mc('資產管理市場的三大主要法規是哪三部？','信託法、信託業法、證券投資信託及顧問法',['信託法、民法、證券交易法','信託業法、銀行法、保險法','信託法、信託稅法、公司法'],'信託法與民法是基礎，外圍有信託業法、信託稅法與他業兼營規範。'),
+ mt('配對金錢信託的分類與定義',[['特定','委託人具體指示所有營運範圍及方法'],['指定','委託人概括指示營運範圍及方法'],['不指定','委託人完全未指示營運範圍及方法']],'三類各可再分單獨管理運用與集合管理運用（細則§6）。'),
+ mc('信託業辦理信託，在性質上稱為什麼？','營業信託（商事信託）',['民事信託','公益信託','法定信託'],'信託業辦理的是營業信託，受託人須具備一般信託業的專業能力，注意義務比較高。')
+]},
+{id:3,part:'第三部分',name:'常見信託類型與實務',src:'信託實務',seal:'型',qs:[
+ mc('保險金信託中，保險與信託的分工是什麼？','保險解決錢從哪裡來，信託解決錢該怎麼管',['保險解決錢怎麼管，信託解決錢從哪裡來','兩者都只負責節稅','保險負責管理，信託負責理賠'],'保險金信託＝保險＋信託，目標是確定的財富、在確定的時間點、以確定的方式，給確定的對象。'),
+ mc('保險事故發生後，保險金信託的錢如何流動？','保險公司把保險金存入信託專戶，受託人依契約管理運用',['保險金先匯給受益人，再由受益人存入信託','保險金存入要保人帳戶','保險公司自行管理並按月給付'],'要保人投保後，委託人（兼受益人）與銀行簽訂保險金信託契約。事故發生後保險金進信託專戶，受託人依約支付信託利益。'),
+ mc('保險金信託的目標是「確定的財富，在確定的時間點，以確定的方式，給確定的＿＿」。','對象',['金額','稅率','受託人'],'確定的財富、時間點、方式與對象，可以降低爭端，也保障未成年人、高齡者等無法妥善管理財務的人。'),
+ mc('商家收取的訂金、預付款存入信託專戶，直到商家依約提供商品服務才釋放，這是哪一種信託？','預收款信託',['員工福利信託','教育信託','有價證券信託'],'預收款信託把預付款鎖在信託專戶，直到商家依約履行，或經信託機構核准才釋放。'),
+ mc('身心障礙信託（special needs trust）的設計重點之一是什麼？','在維持福利資格的前提下額外提供資金',['把全部財產交由政府保管','限制只能用於投資','受益人須放棄醫療補助'],'受益人資產超過一定限制可能喪失福利資格，信託設計可以在維持資格下額外提供醫療、康復、安養照護、教育與日常開銷。'),
+ mc('教育信託應該如何設計？','用途明確，詳訂每年可提取金額、時間與用途，並保留彈性',['只約定總金額，用途由受託人決定','全部一次交付受益人','完全不限用途以保持彈性'],'用途須明確（學費、書籍費、課外活動費），並訂分配計畫。'),
+ mc('「有價證券信託」與「投資信託」的差異是什麼？','前者是把自己的證券交信託機構管理，後者是集合多人資金由基金公司投資',['前者集合多人資金，後者是自己的證券','兩者完全相同','前者只能買國內股票'],'有價證券信託是將股票、債券等交給信託機構管理運作，與投資信託不同。'),
+ mc('不動產信託的好處之一是什麼？','委託人面臨訴訟或財務困境時，信託不動產不被凍結或處分',['可免繳所有不動產稅','委託人可隨時任意取回','信託後房屋成為銀行自己的財產'],'不動產信託防止不動產與個人財產混淆，有助規劃移轉、增值與長期保有家庭不動產。持有期間仍須繳地價稅、房屋稅。'),
+ mt('配對投資策略與特性',[['增長型','可承擔風險、追求高報酬'],['平衡型','折衷，依市況決定股債比例'],['保守型','重穩定']],'策略依受益人的需求、目標與風險承受度設計。'),
+ mt('配對信託的好處',[['財產獨立性','獨立防火牆，不成為債權人求償標的'],['財產管理','預先規劃，保存資產、專家管理'],['資產增值','託付理財，並避免被子女揮霍'],['照顧遺族','身故後依自己的意志分配給家人']],'這四項是講義整理的信託好處。'),
+ mc('生活支出頻繁的高齡客戶，信託財產宜優先配置什麼？','現金、短期債券等高流動性資產',['不動產','高成長股票','非上市股權'],'配置要兼顧長短期需求。需要長期增值的部分才可配置不動產、股票，並定期評估調整。'),
+ tf('信託監督機制中，提起法律訴訟是第一線手段。',false,'監督機制包括設置信託監察人、定期評估、受益人參與，法律措施是最後手段。'),
+ mc('公益信託必須設置什麼角色？','信託監察人',['共同受託人','保證人','遺囑執行人'],'公益信託以公共利益為目的，必設信託監察人（§69 意義、§70 設立、§72 監督）。'),
+ mc('講義表 4-1 中，「設立檢查機制，監督受託人管理行為，促使財務透明」對應哪一條？','§23',['§1','§10','§69'],'§23 是受託人管理不當的賠償責任。§1 協助選擇受託人，§10 評估受託人財務穩定性，§69 協助設計公益信託。')
+]},
+{id:4,part:'第四部分',name:'信託與稅',src:'信託稅制',seal:'稅',qs:[
+ mc('委託人設立「自益信託」，成立當下要課贈與稅嗎？','不課，因為委託人就是受益人',['要課，依移轉財產價值','要課，但可全額扣除','要課所得稅但不課贈與稅'],'自益信託是委託人＝受益人（甲、乙、甲），形式移轉不課贈與稅、所得稅、土地增值稅、契稅、營業稅。'),
+ mc('契約明定受益人為非委託人（確定他益信託），個人委託人在信託成立時要？','申報贈與稅（遺贈稅法§5-1）',['不用申報，等分配時才課','申報遺產稅','只課所得稅'],'視為委託人將享有信託利益的權利贈與受益人，屬「權利」的贈與。'),
+ mc('信託存續期間，持有信託財產課徵哪些稅？','地價稅、田賦、房屋稅',['贈與稅、遺產稅','契稅、土地增值稅','營業稅、印花稅'],'持有課地價稅、田賦、房屋稅；運用信託財產（例如出售）則課土地增值稅、所得稅。'),
+ mc('信託財產所生的利息、股息、租金，依所得稅法§3-4 原則上由誰繳納所得稅？','受益人',['委託人','受託人','信託監察人'],'受益人未特定或尚未存在時，由受託人為納稅義務人，依扣繳率報稅。'),
+ tf('信託成立、受託人變更、依信託目的交付財產給受益人、信託關係終止，原則上免課所得稅（§3-3）。',true,'所得稅法§3-3 列舉信託財產移轉或處分過程中免課所得稅的情形。'),
+ mc('委託人保留權利（形式他益、實質自益）時，贈與稅何時課？','信託成立時不適用§5-1，待利益實際分配時才課（§4）',['信託成立時就課','信託終止時一次課','完全不課'],'委託人無保留權利才在成立時適用§5-1。'),
+ mc('確定他益信託（委託人無保留權利）的所得稅怎麼處理？','由受益人申報，若受益人稅率較低可作為節稅工具',['一律由委託人申報','由受託人申報且不併入任何人所得','免課所得稅'],'信託期間收入併入受益人所得，可達成所得轉移。'),
+ mc('委託人保留權利時，信託期間的收入在所得稅上被視為誰的？','委託人（實質課稅原則）',['受益人','受託人','國庫'],'因為委託人保留權利，無法達到所得轉移的效果。'),
+ mc('委託人為營利事業，設立他益信託時，稅怎麼課？','受益人把享有信託利益的權利價值併入成立年度所得額課所得稅（所得稅法§3-2）',['委託人課贈與稅','免課任何稅','受託人課遺產稅'],'存續中變更受益人或追加信託財產，致增加非委託人享有信託利益的權利者，亦同。'),
+ mc('符合條件的公益信託，受益人享有信託利益的權利價值，贈與稅如何處理？','不計入贈與總額（遺贈稅法§20-1）',['按 10% 課徵','依贈與淨額累進課徵','須併入遺產總額'],'符合所得稅法§4-3 的公益信託，受益人享有的權利價值也免納所得稅。個人捐贈適用§17 列舉扣除，營利事業適用§36。'),
+ mc('下列何者不計入贈與總額？','配偶相互贈與之財產',['贈與子女的現金','贈與兄弟姊妹的股票','贈與朋友的不動產'],'不計入贈與總額：捐贈政府、符合標準的教育文化公益慈善團體、配偶相互贈與。'),
+ mc('下列何者不計入遺產總額？','自己創作的專利權、著作權、藝術品',['上市股票','自用住宅的房屋','銀行存款與應計利息'],'還包括捐贈政府、符合標準的財團法人、向主管機關登記的文化歷史美術物品，以及指定受益人的人壽保險金額等。'),
+ mc('他益信託關係消滅，依信託本旨交付財產給受益人時，會課哪些稅？','土地增值稅、契稅（不課贈與稅、所得稅）',['贈與稅、所得稅','全部免稅','遺產稅'],'信託成立時已就權利課過贈與稅，交付時不再課。自益信託則四種稅都不課。')
+]},
+{id:5,part:'第五部分',name:'遺產稅與贈與稅',src:'遺贈稅法・民法',seal:'遺',qs:[
+ mc('中華民國國民且經常居住境內，遺產稅的課稅範圍是？','境內及境外財產',['僅境內財產','僅境外財產','僅不動產'],'屬人兼採屬地主義。國民經常居住境外，或非中華民國國民，只課境內財產。'),
+ mc('非中華民國國民，遺產稅的課稅範圍是？','僅境內財產',['境內及境外財產','僅境外財產','免課遺產稅'],'只有「國民＋經常居住境內」才境內外都課。'),
+ mc('「經常居住中華民國境內」，通常看被繼承人死亡前多久有住所（以戶籍認定）？','2 年',['6 個月','1 年','5 年'],'無住所而有居所者，死亡前 2 年內在境內居留合計逾 365 天。'),
+ mc('遺產中的土地，以什麼價格估價？','公告土地現值（或評定標準價格）',['市價','取得成本','房屋評定標準價格'],'房屋用評定標準價格。估價以被繼承人死亡時的價值為準。'),
+ mc('上市、上櫃、興櫃股票，以什麼估價？','死亡日收盤價（或當日加權平均成交價）',['票面金額','取得成本','死亡前一年平均價'],'未上市、上櫃股票則以淨值（依公司資產負債表、損益表）估價。保單以保單價值準備金計。'),
+ nm('115 年適用的一般被繼承人，遺產稅免稅額是多少萬元？',1333,'萬','軍警公教人員因執行職務死亡為 2,666 萬。'),
+ nm('115 年贈與稅每人每年免稅額是多少萬元？',244,'萬','贈與稅 = （贈與總額 − 免稅額 − 扣除額）× 累進稅率。'),
+ mc('遺產稅配偶扣除額（115 年）是多少？','553 萬',['138 萬','56 萬','693 萬'],'138 萬是父母每人與喪葬費；56 萬是直系血親卑親屬每人；693 萬是重度以上身心障礙每人。'),
+ mc('遺產稅每位父母的扣除額（115 年）是多少？','138 萬',['56 萬','553 萬','693 萬'],'父母 138 萬／人。受扶養的兄弟姊妹、祖父母 56 萬／人。'),
+ mc('115 年遺產稅三級距的稅率是多少？','10%、15%、20%',['5%、10%、15%','10%、20%、30%','15%、20%、25%'],'遺產淨額 5,621 萬以下 10%，至 1 億 1,242 萬 15%，超過 20%。贈與稅級距是 2,811 萬、5,621 萬。'),
+ nm('只有配偶一位繼承人時，遺產總額低於多少萬元就不用繳遺產稅？（免稅額＋配偶扣除額＋喪葬費）',2024,'萬','1,333 + 553 + 138 = 2,024 萬。但仍須申報。'),
+ nm('遺產淨額 3,000 萬，遺產稅是多少萬元？',300,'萬','3,000 × 10% = 300 萬。'),
+ nm('遺產淨額 6,000 萬，依 115 年級距，遺產稅是多少萬元？',618.95,'萬','6,000 × 15% − 累進差額 281.05 = 618.95 萬。講義舊級距的答案是 650 萬，注意別混用。',0.05),
+ mc('配偶與子女共同繼承，應繼分如何分配？','配偶與子女平均分配',['配偶 1/2，子女 1/2','配偶 2/3，子女 1/3','全歸子女，配偶無應繼分'],'配偶是當然繼承人，與第一順位直系血親卑親屬平均分配。'),
+ mc('配偶與父母（第二順位）共同繼承，配偶的應繼分是多少？','1/2',['1/3','2/3','全部'],'配偶與第二、第三順位各分 1/2；與第四順位（祖父母）則配偶 2/3。'),
+ mc('第一順位繼承人的特留分是多少？','應繼分的 1/2',['應繼分的 1/3','應繼分的 2/3','全部應繼分'],'第一、二順位及配偶特留分都是 1/2，第三、四順位是 1/3。'),
+ mc('被繼承人過世後，遺產稅的申報期限是？','6 個月內，可書面申請延長，最多 3 個月',['30 天內','3 個月內','1 年內'],'即使免稅仍須申報。未依限申報按核定應納稅額加處 2 倍以下罰鍰。'),
+ mc('拋棄繼承須在知悉可繼承後多久內向法院聲明？','3 個月',['30 天','6 個月','2 年'],'拋棄繼承連同遺產稅免稅額、扣除額（如配偶 553 萬）也一併消失。限定繼承也須於 3 個月內陳報遺產清冊。'),
+ mc('死亡前 2 年內贈與哪些人的財產，會被擬制為遺產？','配偶、各順位繼承人及其配偶',['僅配偶','所有親戚朋友','僅直系血親卑親屬'],'擬制遺產＝死亡前 2 年內贈與配偶、各順位繼承人及其配偶的財產。'),
+ mc('依講義整理的 115 年修法，擬制遺產所生的遺產稅由誰負擔？','受贈人單獨負擔，按受贈財產占遺產總額的比例計算',['全體繼承人共同負擔','只由配偶負擔','由國稅局代墊'],'核心是「財產歸誰，稅就跟誰」。這是講義轉載的內容，實際請以正式公布條文為準。'),
+ mc('遺產稅未繳清前，下列哪件事不能做？','分割遺產、交付遺贈或辦理移轉登記',['辦理除戶登記','查詢遺產稅金融遺產參考清單','聲明拋棄繼承'],'除戶登記須在 30 天內辦理，與繳稅無關。'),
+ mc('子女婚嫁時，父母贈與可額外加碼多少（贈與稅）？','每人每年額外 100 萬，於婚嫁後 6 個月內',['每人額外 244 萬','總共 100 萬，一生一次','每人每年 553 萬'],'這是贈與稅的婚嫁加碼。'),
+ mc('遺產稅現金不足時，分期繳納的規定是？','18 期以內，每期間隔不超過 2 個月',['6 期以內，每期間隔 1 個月','24 期以內，每期間隔 3 個月','不得分期'],'講義提到應納稅額 30 萬元以上才得申請，另註明講義 E 稱修法後取消 30 萬門檻。'),
+ mc('遺囑侵害特留分，繼承人請求回復財產的期限是？','知悉受侵害起 2 年內，最長不超過 10 年',['知悉起 30 天內','知悉起 5 年內，無最長期限','死亡起 1 年內'],'建議在不違背特留分的前提下辦理公證，可減少爭議。')
+]},
+{id:6,part:'第六部分',name:'保險與財富傳承',src:'保險・規劃案例',seal:'保',qs:[
+ mc('指定受益人的人壽保險金，為什麼不計入遺產總額？','遺贈稅法§16(9) 與保險法§112 有明文規定',['因為保險金低於免稅額','因為保險公司代繳遺產稅','因為受益人必須是配偶'],'約定於被繼承人死亡時給付指定受益人的人壽保險金額，不得作為被保險人的遺產。'),
+ mc('死亡保險契約沒有指定受益人，保險金會怎麼處理？','視為遺產',['歸國庫','自動由配偶取得','不計入任何稅'],'沒指定受益人就喪失不計入遺產的好處，也無法落實個人意願。'),
+ mc('指定受益人的保險金不計入遺產，帶來什麼好處？','不受應繼分、特留分限制，可落實個人意願',['可以完全免除申報','保險公司負責分配遺產','可以抵扣所有債務'],'受益人地位在契約締結時確定，不因其他繼承人拋棄繼承而受影響。'),
+ mc('要保人是父、被保險人是母、受益人是子女，保險金如何課稅？','視為父贈與子女，須課贈與稅',['視為母的遺產，課遺產稅','免稅，因為是保險金','視為子女自行投保'],'建議要保人＝受益人，避免贈與稅與最低稅負問題。'),
+ mc('下列何者不是財政部實質課稅 8 大態樣之一？','年輕健康者長期分年繳費投保',['躉繳大額保費','帶病投保','舉債投保'],'八大態樣：躉繳、高齡（超過 65 歲）、密集、短期、鉅額、舉債、帶病，以及保險給付低於已繳保費。'),
+ mt('配對實質課稅態樣與說明',[['躉繳投保','一次繳清大額保費'],['高齡投保','超過 65 歲才投保'],['舉債投保','借款買保險，欠債申報時先扣除'],['給付低於已繳保費','價差可能被視為遺產']],'這些情形容易被認定為規避稅負。'),
+ nm('最低稅負制下，死亡給付每一申報戶全年合計多少萬元以下，免計入基本所得額？（113 年起）',3740,'萬','原為 3,330 萬。超過者，扣除 3,740 萬後的餘額計入。'),
+ nm('基本稅額 =（基本所得額 − ＿＿萬）× 20%。請問空格是多少？（113 年度）',750,'萬','基本所得額免稅額 750 萬，稅率 20%。'),
+ mc('最低稅負制適用於什麼樣的保險給付？','受益人與要保人非同一人的人壽保險及年金保險給付',['所有保險給付','只有醫療險給付','只有要保人本人領取的給付'],'適用保險期間始日在 95 年 1 月 1 日以後的保險契約。'),
+ mc('張榮發遺囑案中，其他繼承人原本可主張什麼權利，威脅遺囑效力？','特留分（應繼分的 1/2）',['拋棄繼承','限定繼承','代位繼承'],'最高法院 113/8/15 判決確定遺囑有效。教訓是遺囑形式須合法，且不侵害特留分，否則易訴訟。'),
+ mc('代筆遺囑，講義提到須有幾名以上見證人？','3 名以上',['1 名','2 名','5 名'],'遺囑形式不合法容易引發訴訟。'),
+ mc('未成年子女繼承鉅額遺產時，搭配保險與信託並設置什麼角色，可避免法定代理人實質掌控？','信託監察人',['遺囑執行人','保證人','共同受託人'],'若僅依繼承，錢由法定代理人掌控；搭配保險＋信託可另設信託監察人。'),
+ mc('未成年人監護：父母均不能行使權利義務，也沒有遺囑指定時，監護人依序是？','同居祖父母、同居兄姊、不同居祖父母',['同居兄姊、同居祖父母、不同居祖父母','不同居祖父母、同居祖父母、同居兄姊','由法院直接指定朋友'],'民法§1094。'),
+ mc('「銀行現金很多不用擔心」的迷思，風險在哪？','死亡後存款被凍結，拿不出現金繳遺產稅',['存款利息會被課雙倍稅','存款不算遺產','銀行會自動代繳遺產稅'],'講義介紹，繼承人人數過半且應繼分合計過半，或應繼分合計超過 2/3 時，可申請「遺產稅同意移轉證明書」，由存款直接扣繳稅款。'),
+ mt('配對生老病死與保險規劃',[['生','還本型壽險、投資型保單'],['老','年金險、增額壽險'],['病','醫療險、重大疾病險'],['死','終身壽險、定期壽險、意外險']],'保險規劃要先看風險：收入中斷、失去健康、活得太長、活得太短。'),
+ mc('Wealth-X 報告指出，台灣高資產人士未來 30 年預估有多少比例將移轉給家族或下一代？','76%，居全球第二',['46%，居全球第一','76%，居全球第一','56%，居全球第三'],'這是世代移轉潮的背景，也是及早規劃的原因。')
+]}
+];
+
+var ALLQ={};
+LEVELS.forEach(function(l){l.qs.forEach(function(q,i){q.id=l.id+'-'+i;q.lv=l;ALLQ[q.id]=q})});
+
+var CARDS=[
+['遺產稅免稅額（115 年）','1,333 萬。軍警公教人員因執行職務死亡為 2,666 萬。'],
+['贈與稅免稅額（115 年）','244 萬／人／年。'],
+['遺產稅級距與稅率','淨額 5,621 萬以下 10%；至 1 億 1,242 萬 15%（累進差額 281.05 萬）；超過 20%（累進差額 843.15 萬）。'],
+['贈與稅級距與稅率','淨額 2,811 萬以下 10%；至 5,621 萬 15%（累進差額 140.55 萬）；超過 20%（累進差額 421.6 萬）。'],
+['遺產稅主要扣除額','配偶 553；子女 56；父母 138；重度身障 693；喪葬費 138（單位：萬）。'],
+['只有配偶一位繼承人，免繳遺產稅的門檻','1,333 + 553 + 138 = 2,024 萬。但仍須申報。'],
+['遺產稅申報與繳納期限','死亡後 6 個月內向戶籍所在地國稅局申報，可延 3 個月。免稅也要申報。'],
+['拋棄繼承、限定繼承、除戶','拋棄與限定繼承 3 個月；除戶登記 30 天。'],
+['擬制遺產','死亡前 2 年內贈與配偶、各順位繼承人及其配偶的財產。講義轉載 115 年修法後，稅由受贈人負擔。'],
+['婚嫁贈與加碼','父母於子女婚嫁時，每人每年額外 100 萬，於婚嫁後 6 個月內。'],
+['特留分','第一、二順位 1/2；第三、四順位 1/3；配偶（無任何順位繼承人時）1/2。'],
+['遺囑侵害特留分的回復期限','知悉受侵害起 2 年內，最長不超過 10 年。'],
+['最低稅負制三個數字','死亡給付免計入 3,740 萬；基本所得額免稅額 750 萬；稅率 20%。'],
+['保單被追稅的 8 大態樣','躉繳、高齡（超過 65 歲）、密集、短期、鉅額、舉債、帶病、給付低於已繳保費。'],
+['信託三大確定性','目的確定、財產獨立且明確、受益人確定或可得確定。缺一則信託行為無效。'],
+['信託行為無效（§5）四情形','違反強制禁止規定；違反公序良俗；以訴願訴訟為主要目的；以依法不得受讓特定財產權之人為受益人。'],
+['他益信託與贈與稅','契約明定受益人為非委託人，委託人須課贈與稅（遺贈稅法§5-1）。委託人有保留權利則待實際分配時才課（§4）。'],
+['信託業務（§16）與附屬業務（§17）','§16 是信託關係，共 10 種；§17 是非信託關係，如委任、代理、遺囑執行人、保管業務。'],
+['信託 3.0','2025/1/1 啟動。三目標：創新、普惠、永續。另有六大策略。'],
+['分期繳納遺產稅','18 期以內，每期間隔不超過 2 個月。']
+];
+
+/* ---------- 稅額 ---------- */
+function estTax(n){if(n<=0)return 0;if(n<=5621)return n*0.10;if(n<=11242)return n*0.15-281.05;return n*0.20-843.15}
+function giftTax(n){if(n<=0)return 0;if(n<=2811)return n*0.10;if(n<=5621)return n*0.15-140.55;return n*0.20-421.6}
+function f(n){return Number(Number(n).toFixed(2)).toLocaleString('zh-TW',{maximumFractionDigits:2})}
+function estSteps(n){
+  if(n<=0)return['遺產淨額小於等於 0，不用繳稅，答案填 0。'];
+  var t=estTax(n);
+  if(n<=5621)return[f(n)+' 萬落在 5,621 萬以下，稅率 10%',''+f(n)+' × 10% = '+f(t)+' 萬'];
+  if(n<=11242)return[f(n)+' 萬落在 5,621 萬至 1 億 1,242 萬，稅率 15%，累進差額 281.05 萬',f(n)+' × 15% − 281.05 = '+f(t)+' 萬'];
+  return[f(n)+' 萬超過 1 億 1,242 萬，稅率 20%，累進差額 843.15 萬',f(n)+' × 20% − 843.15 = '+f(t)+' 萬'];
+}
+function giftSteps(net){
+  if(net<=0)return['贈與淨額小於等於 0，不用繳稅，答案填 0。'];
+  var t=giftTax(net);
+  if(net<=2811)return['贈與淨額落在 2,811 萬以下，稅率 10%',f(net)+' × 10% = '+f(t)+' 萬'];
+  if(net<=5621)return['贈與淨額落在 2,811 萬至 5,621 萬，稅率 15%，累進差額 140.55 萬',f(net)+' × 15% − 140.55 = '+f(t)+' 萬'];
+  return['贈與淨額超過 5,621 萬，稅率 20%，累進差額 421.6 萬',f(net)+' × 20% − 421.6 = '+f(t)+' 萬'];
+}
+function genCalc(){
+  var out=[];
+  var net=pick([800,1500,3200,4800,6000,7500,9000,10500,12000,15000,20000]);
+  out.push({q:'遺產淨額為 '+f(net)+' 萬，依 115 年級距，遺產稅是多少萬元？',a:estTax(net),u:'萬',steps:estSteps(net)});
+  var g=pick([300,800,1500,2800,4500,6000,8000,10000]);
+  var gn=g-244;
+  out.push({q:'今年贈與子女現金 '+f(g)+' 萬（只有這一筆贈與，無其他扣除），贈與稅是多少萬元？',a:giftTax(gn),u:'萬',steps:['贈與淨額 = '+f(g)+' − 免稅額 244 = '+f(gn)+' 萬'].concat(giftSteps(gn))});
+  var T=pick([2000,2500,3000,4000,5000,8000,12000,20000]),n=pick([1,2,3]);
+  var en=T-1333-553-56*n-138;
+  out.push({q:'被繼承人遺產總額 '+f(T)+' 萬，繼承人是配偶與 '+n+' 名成年子女，只計免稅額、配偶、子女與喪葬費扣除，遺產稅是多少萬元？（不用繳稅請填 0）',a:estTax(en),u:'萬',
+    steps:['遺產淨額 = '+f(T)+' − 免稅額 1,333 − 配偶 553 − 子女 56×'+n+' − 喪葬費 138 = '+f(en)+' 萬'].concat(estSteps(en))});
+  var X=pick([600,900,1200]),k=pick([2,3]);
+  out.push({q:'夫妻共有財產 '+f(X)+' 萬，配偶過世，繼承人為配偶與 '+k+' 名子女。配偶先取得夫妻共有財產之半，其餘由配偶與子女平均分配，每名子女可分得多少萬元？',a:X/2/(k+1),u:'萬',
+    steps:['配偶先取得一半，其餘 '+f(X/2)+' 萬','由配偶與 '+k+' 名子女共 '+(k+1)+' 人平分','每人 '+f(X/2)+' ÷ '+(k+1)+' = '+f(X/2/(k+1))+' 萬']});
+  var Y=pick([3000,4500,6000,8000]);
+  var inc=Math.max(0,Y-3740);
+  out.push({q:'受益人與要保人不同人，某申報戶全年死亡給付合計 '+f(Y)+' 萬，依 113 年起標準，計入基本所得額的是多少萬元？（不用計入請填 0）',a:inc,u:'萬',
+    steps:Y<=3740?[f(Y)+' 萬未超過 3,740 萬，免計入基本所得額，答案填 0。']:[f(Y)+' − 3,740 = '+f(inc)+' 萬，超過部分計入基本所得額。']});
+  return shuffle(out);
+}
+
+/* ---------- 狀態、階級 ---------- */
+var RANKS=[[0,'信託新手'],[100,'見習受託人'],[300,'傳承規劃師'],[600,'財富管家'],[1000,'傳承大師']];
+function rank(){var r=0;for(var i=0;i<RANKS.length;i++){if(S.xp>=RANKS[i][0])r=i}
+  var c=RANKS[r],n=RANKS[r+1];return{name:c[1],cur:c[0],next:n?n[0]:null}}
+function updateTop(){var rk=rank();$('#topchip').innerHTML='<b>'+rk.name+'</b> · '+S.xp+' XP'}
+function addWrong(id){if(S.wrong.indexOf(id)<0)S.wrong.push(id)}
+function removeWrong(id){var i=S.wrong.indexOf(id);if(i>=0)S.wrong.splice(i,1)}
+function starsText(n){return '★★★'.slice(0,n)+'☆☆☆'.slice(0,3-n)}
+
+var R=null,C=null,D=null;
+
+/* ---------- 首頁 ---------- */
+function home(){
+  R=null;C=null;D=null;
+  var rk=rank();
+  var done=LEVELS.filter(function(l){return (S.stars[l.id]||0)>0}).length;
+  var pct=rk.next?Math.round((S.xp-rk.cur)/(rk.next-rk.cur)*100):100;
+  var wrongN=S.wrong.filter(function(id){return ALLQ[id]}).length;
+  app.innerHTML=
+  '<section class="hero"><div class="hero-txt">'+
+    '<p class="eyebrow">信託法 · 信託業法 · 遺產稅 · 保險金信託</p>'+
+    '<h1>傳承之路</h1>'+
+    '<p class="lead">把五份講義拆成六個關卡。每關抽 8 題，有 3 顆愛心。通關蓋章，答錯的題目會進錯題本，之後回頭複習。</p>'+
+    '<div class="xp"><div class="xp-row"><b>'+rk.name+'</b><span>'+S.xp+' XP'+(rk.next?' / 下一階 '+rk.next:'')+' · 已蓋章 '+done+'/6</span></div>'+
+    '<div class="bar"><i style="width:'+pct+'%"></i></div></div>'+
+  '</div><div class="hero-seal" aria-hidden="true">傳<br>承</div></section>'+
+  '<h2 class="sec">闖關地圖 <small>依講義順序</small></h2><div class="map">'+
+  LEVELS.map(function(l){
+    var s=S.stars[l.id]||0;
+    return '<button class="station" type="button" data-act="level" data-id="'+l.id+'">'+
+      '<span class="seal'+(s>0?' earned':'')+'" aria-hidden="true">'+l.seal+'</span>'+
+      '<span class="st-body"><span class="st-part">'+l.part+' · '+l.src+'</span><br>'+
+      '<span class="st-name">'+l.name+'</span><br>'+
+      '<span class="st-meta">'+(s>0?'<span class="stars">'+starsText(s)+'</span> 最佳':'尚未挑戰 · 題庫 '+l.qs.length+' 題')+'</span></span></button>';
+  }).join('')+'</div>'+
+  '<h2 class="sec">練習場</h2><div class="drills">'+
+    '<button class="drill" type="button" data-act="calc"><h3>稅額計算挑戰</h3><p>5 題隨機出題，用 115 年級距算遺產稅、贈與稅與最低稅負。最佳 '+S.calcBest+'/5</p></button>'+
+    '<button class="drill" type="button" data-act="cards"><h3>數字速記卡</h3><p>免稅額、扣除額、期限、特留分。已記住 '+S.known.length+'/'+CARDS.length+' 張</p></button>'+
+    '<button class="drill" type="button" data-act="wrong"><h3>錯題本</h3><p>'+(wrongN?('還有 '+wrongN+' 題等你重新答對，答對就移出。'):'目前沒有錯題。先去闖關吧。')+'</p></button>'+
+  '</div>'+
+  '<p class="note">數字依講義整理的 115 年適用標準。115 年遺贈稅法修法內容取自講義轉載，實際申報前請以財政部最新公告、正式公布條文或專業人員確認。</p>';
+  updateTop();
+}
+
+/* ---------- 測驗 ---------- */
+function startRun(mode,lv){
+  var list;
+  if(mode==='level'){list=shuffle(lv.qs).slice(0,8)}
+  else{
+    var ids=S.wrong.filter(function(id){return ALLQ[id]});
+    list=shuffle(ids).slice(0,8).map(function(id){return ALLQ[id]});
+  }
+  if(!list.length){wrongEmpty();return}
+  R={mode:mode,lv:lv,list:list,i:0,hearts:mode==='level'?3:null,correct:0,miss:0,streak:0,xp:0,misses:[],answered:false};
+  renderQ();
+}
+function wrongEmpty(){
+  app.innerHTML='<div class="qhead"><button class="link" type="button" data-act="home">← 回地圖</button></div>'+
+  '<div class="empty"><h3>錯題本是空的</h3><p>先去闖關。答錯的題目會自動收進來。</p><div class="acts"><button class="btn" type="button" data-act="home">回地圖</button></div></div>';
+}
+function hudHTML(){
+  var h=R.hearts===null?'':'<span class="hearts" aria-label="剩餘愛心 '+R.hearts+'">'+'♥'.repeat(Math.max(0,R.hearts))+'♡'.repeat(3-Math.max(0,R.hearts))+'</span>';
+  var s=R.streak>=2?'<span class="streak">連對 ×'+R.streak+'</span>':'';
+  return h+s;
+}
+function updateHud(){var el=$('#hud');if(el)el.innerHTML=hudHTML()}
+function tagOf(q){return {mc:'單選',tf:'是非',match:'配對',num:'填數字'}[q.t]}
+function renderQ(){
+  var q=R.list[R.i],n=R.list.length;
+  R.answered=false;R.matchMiss=false;
+  var title=R.mode==='level'?R.lv.name:'錯題本 · '+q.lv.name;
+  app.innerHTML=
+  '<div class="qhead"><button class="link" type="button" data-act="quit">← 離開</button>'+
+  '<div class="qmeta"><span>'+title+'</span><span>第 '+(R.i+1)+' / '+n+' 題</span></div>'+
+  '<div class="hud" id="hud">'+hudHTML()+'</div></div>'+
+  '<div class="bar"><i style="width:'+(R.i/n*100)+'%"></i></div>'+
+  '<article class="qcard"><p class="qtag">'+tagOf(q)+'</p><h2 class="q">'+q.q+'</h2><div id="abox"></div><div id="fb" aria-live="polite"></div></article>';
+  var box=$('#abox');
+  if(q.t==='mc'||q.t==='tf'){
+    R.opts=q.t==='mc'?shuffle([{t:q.a,ok:true}].concat(q.w.map(function(w){return{t:w,ok:false}}))):[{t:'正確',ok:q.a===true},{t:'錯誤',ok:q.a===false}];
+    box.innerHTML='<div class="opts">'+R.opts.map(function(o,i){return '<button class="opt" type="button" data-act="opt" data-i="'+i+'"><span class="k">'+(i+1)+'</span><span>'+o.t+'</span></button>'}).join('')+'</div>';
+  }else if(q.t==='match'){
+    R.m={L:q.p.map(function(p,i){return{i:i,t:p[0]}}),Rt:shuffle(q.p.map(function(p,i){return{i:i,t:p[1]}})),done:{},cnt:0,sel:null,bad:null};
+    drawMatch();
+  }else{
+    box.innerHTML='<form id="nf" class="numrow"><input class="num" id="numin" inputmode="decimal" autocomplete="off" aria-label="答案"> <span class="unit">'+q.u+'</span> <button class="btn" type="submit">送出</button></form>';
+    var inp=$('#numin');if(inp)inp.focus();
+  }
+}
+function drawMatch(){
+  var m=R.m;
+  $('#abox').innerHTML='<div class="match"><div class="mcol">'+
+    m.L.map(function(x){var d=m.done[x.i];return '<button class="mbtn'+(d?' done':'')+(m.sel===x.i?' sel':'')+'" type="button" data-act="mL" data-i="'+x.i+'"'+(d?' disabled':'')+'>'+x.t+'</button>'}).join('')+
+    '</div><div class="mcol">'+
+    m.Rt.map(function(x){var d=m.done[x.i];return '<button class="mbtn'+(d?' done':'')+(m.bad===x.i?' bad':'')+'" type="button" data-act="mR" data-i="'+x.i+'"'+(d?' disabled':'')+'>'+x.t+'</button>'}).join('')+
+    '</div></div><p class="hint">先點左邊，再點右邊，配成一對。配錯會扣一顆愛心，每題只扣一次。</p>';
+  m.bad=null;
+}
+function goodAnswer(q){
+  R.correct++;R.streak++;
+  R.xp+=(R.mode==='wrong'?5:10)+(R.streak>=3?5:0);
+  removeWrong(q.id);
+}
+function badAnswer(q){
+  R.streak=0;R.miss++;
+  if(R.hearts!==null)R.hearts--;
+  var has=R.misses.some(function(x){return x.id===q.id});
+  if(!has)R.misses.push(q);
+  addWrong(q.id);
+  updateHud();
+}
+function answerText(q){
+  if(q.t==='mc')return q.a;
+  if(q.t==='tf')return q.a?'正確':'錯誤';
+  if(q.t==='num')return f(q.a)+' '+q.u;
+  return q.p.map(function(p){return p[0]+' → '+p[1]}).join('；');
+}
+function showFeedback(ok,q){
+  R.answered=true;
+  var last=R.i>=R.list.length-1||(R.hearts!==null&&R.hearts<=0);
+  var head=ok?'答對了':(R.hearts!==null&&R.hearts<=0?'答錯了，愛心用完':'答錯了');
+  var extra=(!ok&&(q.t==='mc'||q.t==='num'))?'<p><b>正確答案：</b>'+answerText(q)+'</p>':'';
+  $('#fb').innerHTML='<div class="fb'+(ok?'':' bad')+'"><strong>'+head+'</strong>'+extra+'<p>'+q.e+'</p>'+
+    '<button class="btn" type="button" data-act="next" id="nextbtn">'+(last?'看結果':'下一題')+'</button></div>';
+  updateHud();
+  var b=$('#nextbtn');if(b)b.focus();
+}
+function pickOpt(i){
+  if(!R||R.answered)return;
+  var q=R.list[R.i];var o=R.opts[i];if(!o)return;
+  var btns=app.querySelectorAll('.opt');
+  btns.forEach(function(b,j){b.disabled=true;if(R.opts[j].ok)b.classList.add('right');else if(j===i)b.classList.add('bad')});
+  if(o.ok)goodAnswer(q);else badAnswer(q);
+  showFeedback(o.ok,q);
+}
+function submitNum(){
+  if(!R||R.answered)return;
+  var q=R.list[R.i];
+  var v=parseFloat(String($('#numin').value).replace(/[,，\s]/g,''));
+  if(isNaN(v)){$('#numin').focus();return}
+  var ok=Math.abs(v-q.a)<=(q.tol||0)+1e-9;
+  $('#numin').disabled=true;app.querySelector('#nf .btn').disabled=true;
+  if(ok)goodAnswer(q);else badAnswer(q);
+  showFeedback(ok,q);
+}
+function pickMatch(side,i){
+  if(!R||R.answered)return;
+  var m=R.m,q=R.list[R.i];
+  if(side==='L'){m.sel=m.sel===i?null:i;drawMatch();return}
+  if(m.sel===null)return;
+  if(m.sel===i){
+    m.done[i]=true;m.cnt++;m.sel=null;drawMatch();
+    if(m.cnt===q.p.length){
+      if(!R.matchMiss)goodAnswer(q);
+      showFeedback(!R.matchMiss,q);
+    }
+  }else{
+    m.bad=i;m.sel=null;
+    if(!R.matchMiss){
+      R.matchMiss=true;badAnswer(q);
+      if(R.hearts!==null&&R.hearts<=0){
+        q.p.forEach(function(p,k){m.done[k]=true});m.cnt=q.p.length;drawMatch();showFeedback(false,q);return;
+      }
+    }
+    drawMatch();
+  }
+}
+function nextQ(){
+  if(!R)return;
+  if((R.hearts!==null&&R.hearts<=0)||R.i>=R.list.length-1){finish();return}
+  R.i++;renderQ();
+}
+function finish(){
+  var lvMode=R.mode==='level';
+  var passed=R.hearts===null?true:R.hearts>0;
+  var stars=(lvMode&&passed)?Math.max(1,3-R.miss):0;
+  var bonus=(lvMode&&passed)?20+stars*5:0;
+  var gain=R.xp+bonus;
+  S.xp+=gain;S.played++;
+  if(lvMode&&stars>(S.stars[R.lv.id]||0))S.stars[R.lv.id]=stars;
+  save();updateTop();
+  var wrongLeft=S.wrong.filter(function(id){return ALLQ[id]}).length;
+  var html='<section class="result">';
+  if(lvMode){
+    html+=passed?'<div class="stamp" aria-hidden="true">'+R.lv.seal+'</div><h2>通關，蓋章完成</h2><p class="stars">'+starsText(stars)+'</p>':
+      '<div class="stamp fail" aria-hidden="true">'+R.lv.seal+'</div><h2>愛心用完了</h2>';
+    html+='<p class="sum">'+R.lv.name+' · 答對 '+R.correct+' / '+R.list.length+' 題 · 獲得 '+gain+' XP</p>';
+  }else{
+    html+='<div class="stamp" aria-hidden="true">複</div><h2>本輪複習結束</h2><p class="sum">答對 '+R.correct+' / '+R.list.length+' 題 · 獲得 '+gain+' XP · 錯題本還剩 '+wrongLeft+' 題</p>';
+  }
+  html+='<div class="acts">'+
+    (lvMode?'<button class="btn" type="button" data-act="again">'+(passed?'再玩一輪':'重新挑戰')+'</button>':
+      (wrongLeft?'<button class="btn" type="button" data-act="wrong">繼續複習</button>':''))+
+    '<button class="btn ghost" type="button" data-act="home">回地圖</button></div>';
+  if(R.misses.length){
+    html+='<div class="review"><h3>這輪答錯的題目</h3>'+R.misses.map(function(q){
+      return '<div class="rv"><b>'+q.q+'</b><span>'+answerText(q)+'</span></div>'}).join('')+'</div>';
+  }
+  html+='</section>';
+  app.innerHTML=html;
+}
+
+/* ---------- 計算挑戰 ---------- */
+function startCalc(){C={items:genCalc(),i:0,score:0,answered:false};renderCalc()}
+function renderCalc(){
+  var it=C.items[C.i];C.answered=false;
+  app.innerHTML=
+  '<div class="qhead"><button class="link" type="button" data-act="quit">← 離開</button><div class="qmeta"><span>稅額計算挑戰</span><span>第 '+(C.i+1)+' / 5 題</span></div><div class="hud">答對 '+C.score+'</div></div>'+
+  '<div class="bar"><i style="width:'+(C.i/5*100)+'%"></i></div>'+
+  '<article class="qcard"><p class="qtag">計算</p><h2 class="q">'+it.q+'</h2>'+
+  '<form id="cf" class="numrow"><input class="num" id="cin" inputmode="decimal" autocomplete="off" aria-label="答案"> <span class="unit">'+it.u+'</span> <button class="btn" type="submit">送出</button></form>'+
+  '<div id="fb" aria-live="polite"></div></article>'+
+  '<details class="ref"><summary>查看 115 年稅率表</summary><div class="tbl"><table><thead><tr><th>稅別</th><th>淨額</th><th>稅率</th><th>累進差額（萬）</th></tr></thead><tbody>'+
+  '<tr><td>遺產稅</td><td>5,621 萬以下</td><td>10%</td><td>0</td></tr>'+
+  '<tr><td>遺產稅</td><td>5,621 萬〜1 億 1,242 萬</td><td>15%</td><td>281.05</td></tr>'+
+  '<tr><td>遺產稅</td><td>超過 1 億 1,242 萬</td><td>20%</td><td>843.15</td></tr>'+
+  '<tr><td>贈與稅</td><td>2,811 萬以下</td><td>10%</td><td>0</td></tr>'+
+  '<tr><td>贈與稅</td><td>2,811 萬〜5,621 萬</td><td>15%</td><td>140.55</td></tr>'+
+  '<tr><td>贈與稅</td><td>超過 5,621 萬</td><td>20%</td><td>421.6</td></tr>'+
+  '</tbody></table></div><p class="hint">免稅額：遺產 1,333；贈與 244。扣除額：配偶 553、子女 56、喪葬 138（萬）。最低稅負死亡給付免計入 3,740 萬。</p></details>';
+  var i=$('#cin');if(i)i.focus();
+}
+function submitCalc(){
+  if(!C||C.answered)return;
+  var it=C.items[C.i];
+  var v=parseFloat(String($('#cin').value).replace(/[,，\s]/g,''));
+  if(isNaN(v)){$('#cin').focus();return}
+  C.answered=true;
+  var ok=Math.abs(v-it.a)<=0.05;
+  if(ok){C.score++;S.xp+=15}
+  save();updateTop();
+  $('#cin').disabled=true;app.querySelector('#cf .btn').disabled=true;
+  var last=C.i>=4;
+  $('#fb').innerHTML='<div class="fb'+(ok?'':' bad')+'"><strong>'+(ok?'答對了':'答錯了')+'，正確答案 '+f(it.a)+' '+it.u+'</strong>'+
+    '<ol class="steps">'+it.steps.map(function(s){return '<li>'+s+'</li>'}).join('')+'</ol>'+
+    '<button class="btn" type="button" data-act="cnext" id="nextbtn">'+(last?'看結果':'下一題')+'</button></div>';
+  var b=$('#nextbtn');if(b)b.focus();
+}
+function calcNext(){
+  if(C.i>=4){
+    if(C.score>S.calcBest)S.calcBest=C.score;save();
+    var sc=C.score;
+    app.innerHTML='<section class="result"><div class="stamp'+(sc>=3?'':' fail')+'" aria-hidden="true">'+sc+'</div><h2>答對 '+sc+' / 5 題</h2>'+
+      '<p class="sum">每題 15 XP · 最佳紀錄 '+S.calcBest+' / 5</p>'+
+      '<div class="acts"><button class="btn" type="button" data-act="calc">再來一輪</button><button class="btn ghost" type="button" data-act="home">回地圖</button></div></section>';
+    return;
+  }
+  C.i++;renderCalc();
+}
+
+/* ---------- 速記卡 ---------- */
+function startCards(){D={deck:shuffle(CARDS),i:0,back:false};renderCard()}
+function renderCard(){
+  var c=D.deck[D.i];
+  var known=S.known.indexOf(c[0])>=0;
+  app.innerHTML=
+  '<div class="qhead"><button class="link" type="button" data-act="home">← 回地圖</button><div class="qmeta"><span>數字速記卡</span><span>第 '+(D.i+1)+' / '+D.deck.length+' 張</span></div><div class="hud">已記住 '+S.known.length+' / '+CARDS.length+'</div></div>'+
+  '<div class="bar"><i style="width:'+(S.known.length/CARDS.length*100)+'%"></i></div>'+
+  '<div style="margin-top:18px"><button class="flash'+(D.back?' back':'')+'" type="button" data-act="flip" aria-label="翻面"><span><span class="side">'+(D.back?'答案':'題目')+(known?' · 已記住':'')+'</span><br><span class="txt">'+(D.back?c[1]:c[0])+'</span></span></button></div>'+
+  '<div class="cardnav"><button class="btn ghost" type="button" data-act="cprev">上一張</button><div class="mid">'+
+  '<button class="btn ghost" type="button" data-act="cagain">再複習</button><button class="btn" type="button" data-act="cknow">記住了</button></div>'+
+  '<button class="btn ghost" type="button" data-act="cnextcard">下一張</button></div>'+
+  '<p class="hint" style="margin-top:14px">點卡片翻面。先在心裡答，再看背面。</p>';
+}
+function cardMove(d){D.i=(D.i+d+D.deck.length)%D.deck.length;D.back=false;renderCard()}
+
+/* ---------- 事件 ---------- */
+var H={
+  home:home,
+  level:function(b){var l=LEVELS.filter(function(x){return String(x.id)===b.dataset.id})[0];startRun('level',l)},
+  wrong:function(){startRun('wrong',null)},
+  calc:startCalc,cards:startCards,
+  quit:home,
+  opt:function(b){pickOpt(+b.dataset.i)},
+  mL:function(b){pickMatch('L',+b.dataset.i)},
+  mR:function(b){pickMatch('R',+b.dataset.i)},
+  next:nextQ,
+  again:function(){if(R&&R.lv)startRun('level',R.lv)},
+  cnext:calcNext,
+  flip:function(){D.back=!D.back;renderCard()},
+  cprev:function(){cardMove(-1)},
+  cnextcard:function(){cardMove(1)},
+  cknow:function(){var k=D.deck[D.i][0];if(S.known.indexOf(k)<0)S.known.push(k);save();cardMove(1)},
+  cagain:function(){var k=D.deck[D.i][0],i=S.known.indexOf(k);if(i>=0)S.known.splice(i,1);save();cardMove(1)}
+};
+document.addEventListener('click',function(e){
+  var b=e.target.closest?e.target.closest('[data-act]'):null;
+  if(!b)return;
+  var h=H[b.dataset.act];if(h){h(b);window.scrollTo&&window.scrollTo(0,0)}
+});
+document.addEventListener('submit',function(e){
+  e.preventDefault();
+  if(e.target.id==='nf')submitNum();
+  if(e.target.id==='cf')submitCalc();
+});
+document.addEventListener('keydown',function(e){
+  if(!R||R.answered)return;
+  var q=R.list[R.i];
+  if(q&&(q.t==='mc'||q.t==='tf')&&/^[1-4]$/.test(e.key)){pickOpt(+e.key-1)}
+});
+
+home();
+if(typeof __TEST__!=='undefined'){__TEST__({LEVELS:LEVELS,CARDS:CARDS,genCalc:genCalc,estTax:estTax,giftTax:giftTax})}
+})();
+</script>
+
+</body>
+</html>
