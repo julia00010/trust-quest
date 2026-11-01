@@ -146,6 +146,7 @@ th{color:var(--muted);font-weight:500}
   .mbtn{font-size:14px;padding:10px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.stat{display:block;margin-top:10px;padding:10px 14px;border-left:4px solid var(--seal);background:var(--soft);font-family:var(--f-display);font-weight:700;font-size:16px;line-height:1.8}
 </style>
 
 </head>
@@ -308,8 +309,20 @@ var LEVELS=[
 ]}
 ];
 
+
+/* ---------- 法條辨識題庫（條文大意，非逐字官方條文） ---------- */
+var LAWLV={id:7,name:'法條辨識'};
+var LAWS=[["信託法","§1　信託的定義","委託人將財產權移轉或為其他處分，使受託人依信託本旨，為受益人之利益或特定之目的，管理或處分信託財產之關係。","定義條文，說明三方當事人與信託關係。"],["信託法","§3　他益信託的限制","委託人與受益人非同一人者，委託人除信託行為另有保留外，於信託成立後不得變更受益人或終止其信託，亦不得處分受益人之權利。但經受益人同意者，不在此限。","保護他益信託的受益人。"],["信託法","§4　信託公示","以應登記或註冊之財產權為信託者，非經信託登記，不得對抗第三人；以股票或公司債為信託者，非通知發行公司，不得對抗該公司。","信託公示方法與對抗要件。"],["信託法","§5　信託行為無效","目的違反強制或禁止規定、違反公序良俗、以進行訴願或訴訟為主要目的，或以依法不得受讓特定財產權之人為受益人者，信託無效。","無效的四種情形。"],["信託法","§6　信託行為的撤銷","信託行為有害於委託人之債權人權利者，債權人得聲請法院撤銷之；信託成立後六個月內，委託人或其遺產受破產宣告者，推定其行為有害及債權。","債權人撤銷權。"],["信託法","§9　信託財產與同一性","受託人因信託行為取得之財產權為信託財產；因管理、處分、滅失、毀損或其他事由取得之財產權，仍屬信託財產。","物上代位，信託財產的同一性。"],["信託法","§10　受託人死亡","受託人死亡時，信託財產不屬於其遺產。","信託財產獨立性之一。"],["信託法","§11　受託人破產","受託人破產時，信託財產不屬於其破產財團。","信託財產獨立性之二。"],["信託法","§12　不得強制執行","對信託財產不得強制執行。但基於信託前存在於該財產之權利、因處理信託事務所生之權利或其他法律另有規定者，不在此限。","信託財產原則上不得強制執行。"],["信託法","§17　受益人的權利","受益人因信託之成立而享有信託利益。但信託行為另有訂定者，從其所定。受益人得拋棄其享有信託利益之權利。","受益人不需意思表示即享有利益，可拋棄。"],["信託法","§22　善良管理人注意義務","受託人應依信託本旨，以善良管理人之注意，處理信託事務。","受託人的基本注意義務。"],["信託法","§24　分別管理義務","受託人應將信託財產與其自有財產及其他信託財產分別管理。","自有財產與信託財產分開。"],["信託法","§34　忠實義務","受託人不得以任何名義，享有信託利益。但與他人為共同受益人時，不在此限。","忠實義務：不得為自己圖利。"],["信託業法","§16　信託業務","信託業經營之業務項目：金錢之信託、金錢債權及其擔保物權之信託、有價證券之信託、動產、不動產、租賃權、地上權、專利權、著作權及其他財產權之信託。","十項信託業務（適用信託關係）。"],["信託業法","§17　附屬業務","信託業得辦理：代理有價證券發行、擔任遺囑執行人及遺產管理人、擔任信託監察人、辦理保管及出租保管箱、與信託業務有關之不動產買賣租賃居間等業務。","附屬業務，適用非信託關係。"],["信託業法","§25　自易行為","信託業與其利害關係人間，就信託財產進行自己交易，原則上絕對禁止。","利害關係人的自易行為。"],["稅法","遺贈稅法§5-1　他益信託課稅","信託契約明定信託利益之全部或一部之受益人為非委託人者，視為委託人將享有信託利益之權利贈與該受益人，應課徵贈與稅。","他益信託視為贈與。"],["稅法","遺贈稅法§16(9)／保險法§112","約定於被繼承人死亡時，給付其所指定受益人之人壽保險金額，不計入遺產總額；保險金額約定於被保險人死亡時給付指定受益人者，不得作為被保險人之遺產。","指定受益人之保險金不計入遺產。"],["稅法","所得稅法§3-4　信託所得","信託財產發生之收入，於信託關係存續中，依規定由受益人併入其所得課稅；受益人未特定或尚未存在者，以受託人為納稅義務人。","信託收入的所得稅納稅義務人。"],["信託法","§23　管理不當的賠償","受託人因管理不當致信託財產發生損害或違反信託本旨處分信託財產時，委託人、受益人或其他受託人得請求以金錢賠償信託財產所受損害或回復原狀，並得請求減免報酬。","違反義務時的損害賠償與回復原狀。"],["信託法","§25　自己處理義務","受託人應自己處理信託事務。但信託行為另有訂定或有不得已之事由者，得使第三人代為處理。","原則上須自己處理信託事務。"],["信託法","§52　信託監察人的選任","受益人不特定、尚未存在或其他為保護受益人之利益認有必要時，法院得因利害關係人或檢察官之聲請，選任一人或數人為信託監察人。","法院選任信託監察人的情形。"],["信託法","§70　公益信託的設立","公益信託之設立及其受託人，應經目的事業主管機關之許可。","公益信託須經主管機關許可。"],["民法","§1138　繼承順位","遺產繼承人，除配偶外，依下列順序定之：直系血親卑親屬、父母、兄弟姊妹、祖父母。","法定繼承人的四個順位。"],["民法","§1144　配偶的應繼分","配偶有相互繼承遺產之權，其應繼分：與第一順序繼承人同為繼承時，平均；與第二或第三順序同為繼承時，為遺產二分之一；與第四順序同為繼承時，為遺產三分之二；無第一至第四順序繼承人時，為遺產全部。","配偶與各順位共同繼承的應繼分。"]];
+var LAWQ=LAWS.map(function(l,i){
+  var lab=function(x){return x[0]==='稅法'?x[1]:x[0]+x[1]};
+  var same=LAWS.filter(function(x){return x!==l&&x[0]===l[0]}),oth=LAWS.filter(function(x){return x!==l&&x[0]!==l[0]});
+  var wrong=shuffle(same).concat(shuffle(oth)).slice(0,3).map(lab);
+  return {t:'mc',q:'下列條文內容是哪一條？<br><span class="stat">「'+l[2]+'」</span>',a:lab(l),w:wrong,e:'答案：'+lab(l)+'。'+l[3]+'（條文為大意整理，請以法規資料庫為準。）'};
+});
+
 var ALLQ={};
 LEVELS.forEach(function(l){l.qs.forEach(function(q,i){q.id=l.id+'-'+i;q.lv=l;ALLQ[q.id]=q})});
+LAWQ.forEach(function(q,i){q.id='7-'+i;q.lv=LAWLV;ALLQ[q.id]=q});
 
 var CARDS=[
 ['遺產稅免稅額（115 年）','1,333 萬。軍警公教人員因執行職務死亡為 2,666 萬。'],
@@ -416,6 +429,7 @@ function home(){
   '<h2 class="sec">練習場</h2><div class="drills">'+
     '<button class="drill" type="button" data-act="calc"><h3>稅額計算挑戰</h3><p>5 題隨機出題，用 115 年級距算遺產稅、贈與稅與最低稅負。最佳 '+S.calcBest+'/5</p></button>'+
     '<button class="drill" type="button" data-act="cards"><h3>數字速記卡</h3><p>免稅額、扣除額、期限、特留分。已記住 '+S.known.length+'/'+CARDS.length+' 張</p></button>'+
+    '<button class="drill" type="button" data-act="law"><h3>法條辨識</h3><p>給你一段條文內容，選出它是哪一條。共 '+LAWQ.length+' 條，涵蓋信託法、信託業法、稅法、民法。</p></button>'+
     '<button class="drill" type="button" data-act="wrong"><h3>錯題本</h3><p>'+(wrongN?('還有 '+wrongN+' 題等你重新答對，答對就移出。'):'目前沒有錯題。先去闖關吧。')+'</p></button>'+
   '</div>'+
   '<p class="note">數字依講義整理的 115 年適用標準。115 年遺贈稅法修法內容取自講義轉載，實際申報前請以財政部最新公告、正式公布條文或專業人員確認。</p>';
@@ -426,6 +440,7 @@ function home(){
 function startRun(mode,lv){
   var list;
   if(mode==='level'){list=shuffle(lv.qs).slice(0,8)}
+  else if(mode==='law'){list=shuffle(LAWQ).slice(0,8)}
   else{
     var ids=S.wrong.filter(function(id){return ALLQ[id]});
     list=shuffle(ids).slice(0,8).map(function(id){return ALLQ[id]});
@@ -448,7 +463,7 @@ function tagOf(q){return {mc:'單選',tf:'是非',match:'配對',num:'填數字'
 function renderQ(){
   var q=R.list[R.i],n=R.list.length;
   R.answered=false;R.matchMiss=false;
-  var title=R.mode==='level'?R.lv.name:'錯題本 · '+q.lv.name;
+  var title=R.mode==='level'?R.lv.name:R.mode==='law'?'法條辨識':'錯題本 · '+q.lv.name;
   app.innerHTML=
   '<div class="qhead"><button class="link" type="button" data-act="quit">← 離開</button>'+
   '<div class="qmeta"><span>'+title+'</span><span>第 '+(R.i+1)+' / '+n+' 題</span></div>'+
@@ -566,11 +581,11 @@ function finish(){
       '<div class="stamp fail" aria-hidden="true">'+R.lv.seal+'</div><h2>愛心用完了</h2>';
     html+='<p class="sum">'+R.lv.name+' · 答對 '+R.correct+' / '+R.list.length+' 題 · 獲得 '+gain+' XP</p>';
   }else{
-    html+='<div class="stamp" aria-hidden="true">複</div><h2>本輪複習結束</h2><p class="sum">答對 '+R.correct+' / '+R.list.length+' 題 · 獲得 '+gain+' XP · 錯題本還剩 '+wrongLeft+' 題</p>';
+    html+='<div class="stamp" aria-hidden="true">'+(R.mode==='law'?'法':'複')+'</div><h2>'+(R.mode==='law'?'法條辨識結束':'本輪複習結束')+'</h2><p class="sum">答對 '+R.correct+' / '+R.list.length+' 題 · 獲得 '+gain+' XP · 錯題本還剩 '+wrongLeft+' 題</p>';
   }
   html+='<div class="acts">'+
     (lvMode?'<button class="btn" type="button" data-act="again">'+(passed?'再玩一輪':'重新挑戰')+'</button>':
-      (wrongLeft?'<button class="btn" type="button" data-act="wrong">繼續複習</button>':''))+
+      (R.mode==='law'?'<button class="btn" type="button" data-act="again">再練一輪</button>':wrongLeft?'<button class="btn" type="button" data-act="wrong">繼續複習</button>':''))+
     '<button class="btn ghost" type="button" data-act="home">回地圖</button></div>';
   if(R.misses.length){
     html+='<div class="review"><h3>這輪答錯的題目</h3>'+R.misses.map(function(q){
@@ -655,7 +670,8 @@ var H={
   mL:function(b){pickMatch('L',+b.dataset.i)},
   mR:function(b){pickMatch('R',+b.dataset.i)},
   next:nextQ,
-  again:function(){if(R&&R.lv)startRun('level',R.lv)},
+  again:function(){if(R&&R.mode==='law')startRun('law',null);else if(R&&R.lv)startRun('level',R.lv)},
+  law:function(){startRun('law',null)},
   cnext:calcNext,
   flip:function(){D.back=!D.back;renderCard()},
   cprev:function(){cardMove(-1)},
