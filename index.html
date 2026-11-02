@@ -147,6 +147,14 @@ th{color:var(--muted);font-weight:500}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .stat{display:block;margin-top:10px;padding:10px 14px;border-left:4px solid var(--seal);background:var(--soft);font-family:var(--f-display);font-weight:700;font-size:16px;line-height:1.8}
+.pickbox{margin:14px 0;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.pickbox h3{margin:0 0 8px;font-size:15px}
+.pk{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;margin:6px 0;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;cursor:pointer}
+.pk em{margin-left:auto;font-style:normal;color:var(--muted);font-size:13px}
+.pk .box{flex:none;width:22px;height:22px;border:1.5px solid var(--line);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;color:var(--accent-ink)}
+.pk.on{border-color:var(--seal);background:var(--seal-bg)}.pk.on .box{background:var(--seal);border-color:var(--seal)}
+.nrow{display:flex;flex-wrap:wrap;gap:8px}.pk.nn{width:auto;justify-content:center;margin:0;padding:9px 16px}
+.pk:focus-visible{outline:3px solid var(--seal);outline-offset:2px}
 </style>
 
 </head>
@@ -413,7 +421,7 @@ function home(){
   '<section class="hero"><div class="hero-txt">'+
     '<p class="eyebrow">信託法 · 信託業法 · 遺產稅 · 保險金信託</p>'+
     '<h1>傳承之路</h1>'+
-    '<p class="lead">把講義重點整理拆成六個關卡。每關抽 8 題，有 3 顆愛心。通關蓋章，答錯的題目會進錯題本，之後回頭複習。</p>'+
+    '<p class="lead">把講義重點整理拆成六個關卡。每關一次抽 15 題，有 3 顆愛心。通關蓋章，答錯的題目會進錯題本，之後回頭複習。</p>'+
     '<div class="xp"><div class="xp-row"><b>'+rk.name+'</b><span>'+S.xp+' XP'+(rk.next?' / 下一階 '+rk.next:'')+' · 已蓋章 '+done+'/6</span></div>'+
     '<div class="bar"><i style="width:'+pct+'%"></i></div></div>'+
   '</div><div class="hero-seal" aria-hidden="true">傳<br>承</div></section>'+
@@ -429,6 +437,7 @@ function home(){
   '<h2 class="sec">練習場</h2><div class="drills">'+
     '<button class="drill" type="button" data-act="calc"><h3>稅額計算挑戰</h3><p>5 題隨機出題，用 115 年級距算遺產稅、贈與稅與最低稅負。最佳 '+S.calcBest+'/5</p></button>'+
     '<button class="drill" type="button" data-act="cards"><h3>數字速記卡</h3><p>免稅額、扣除額、期限、特留分。已記住 '+S.known.length+'/'+CARDS.length+' 張</p></button>'+
+    '<button class="drill" type="button" data-act="custom"><h3>自選練習</h3><p>自己勾選題庫、決定題數（10／15／20／30／全部），可混合多個關卡與法條。</p></button>'+
     '<button class="drill" type="button" data-act="law"><h3>法條辨識</h3><p>給你一段條文內容，選出它是哪一條。共 '+LAWQ.length+' 條，涵蓋信託法、信託業法、稅法、民法。</p></button>'+
     '<button class="drill" type="button" data-act="wrong"><h3>錯題本</h3><p>'+(wrongN?('還有 '+wrongN+' 題等你重新答對，答對就移出。'):'目前沒有錯題。先去闖關吧。')+'</p></button>'+
   '</div>'+
@@ -439,11 +448,11 @@ function home(){
 /* ---------- 測驗 ---------- */
 function startRun(mode,lv){
   var list;
-  if(mode==='level'){list=shuffle(lv.qs).slice(0,8)}
-  else if(mode==='law'){list=shuffle(LAWQ).slice(0,8)}
+  if(mode==='level'){list=shuffle(lv.qs).slice(0,15)}
+  else if(mode==='law'){list=shuffle(LAWQ).slice(0,15)}
   else{
     var ids=S.wrong.filter(function(id){return ALLQ[id]});
-    list=shuffle(ids).slice(0,8).map(function(id){return ALLQ[id]});
+    list=shuffle(ids).slice(0,15).map(function(id){return ALLQ[id]});
   }
   if(!list.length){wrongEmpty();return}
   R={mode:mode,lv:lv,list:list,i:0,hearts:mode==='level'?3:null,correct:0,miss:0,streak:0,xp:0,misses:[],answered:false};
@@ -463,7 +472,7 @@ function tagOf(q){return {mc:'單選',tf:'是非',match:'配對',num:'填數字'
 function renderQ(){
   var q=R.list[R.i],n=R.list.length;
   R.answered=false;R.matchMiss=false;
-  var title=R.mode==='level'?R.lv.name:R.mode==='law'?'法條辨識':'錯題本 · '+q.lv.name;
+  var title=R.mode==='level'?R.lv.name:R.mode==='custom'?'自選練習 · '+q.lv.name:R.mode==='law'?'法條辨識':'錯題本 · '+q.lv.name;
   app.innerHTML=
   '<div class="qhead"><button class="link" type="button" data-act="quit">← 離開</button>'+
   '<div class="qmeta"><span>'+title+'</span><span>第 '+(R.i+1)+' / '+n+' 題</span></div>'+
@@ -581,11 +590,11 @@ function finish(){
       '<div class="stamp fail" aria-hidden="true">'+R.lv.seal+'</div><h2>愛心用完了</h2>';
     html+='<p class="sum">'+R.lv.name+' · 答對 '+R.correct+' / '+R.list.length+' 題 · 獲得 '+gain+' XP</p>';
   }else{
-    html+='<div class="stamp" aria-hidden="true">'+(R.mode==='law'?'法':'複')+'</div><h2>'+(R.mode==='law'?'法條辨識結束':'本輪複習結束')+'</h2><p class="sum">答對 '+R.correct+' / '+R.list.length+' 題 · 獲得 '+gain+' XP · 錯題本還剩 '+wrongLeft+' 題</p>';
+    html+='<div class="stamp" aria-hidden="true">'+(R.mode==='law'?'法':R.mode==='custom'?'練':'複')+'</div><h2>'+(R.mode==='law'?'法條辨識結束':R.mode==='custom'?'自選練習結束':'本輪複習結束')+'</h2><p class="sum">答對 '+R.correct+' / '+R.list.length+' 題 · 獲得 '+gain+' XP · 錯題本還剩 '+wrongLeft+' 題</p>';
   }
   html+='<div class="acts">'+
     (lvMode?'<button class="btn" type="button" data-act="again">'+(passed?'再玩一輪':'重新挑戰')+'</button>':
-      (R.mode==='law'?'<button class="btn" type="button" data-act="again">再練一輪</button>':wrongLeft?'<button class="btn" type="button" data-act="wrong">繼續複習</button>':''))+
+      (R.mode==='law'?'<button class="btn" type="button" data-act="again">再練一輪</button>':R.mode==='custom'?'<button class="btn" type="button" data-act="again">用相同設定再練</button><button class="btn ghost" type="button" data-act="custom">調整題庫與題數</button>':wrongLeft?'<button class="btn" type="button" data-act="wrong">繼續複習</button>':''))+
     '<button class="btn ghost" type="button" data-act="home">回地圖</button></div>';
   if(R.misses.length){
     html+='<div class="review"><h3>這輪答錯的題目</h3>'+R.misses.map(function(q){
@@ -593,6 +602,37 @@ function finish(){
   }
   html+='</section>';
   app.innerHTML=html;
+}
+
+
+/* ---------- 自選練習 ---------- */
+var CU={sel:{'1':1,'2':1,'3':1,'4':1,'5':1,'6':1,'law':0,'wrong':0},n:15};
+function bankList(k){
+  if(k==='law')return LAWQ;
+  if(k==='wrong')return S.wrong.filter(function(id){return ALLQ[id]}).map(function(id){return ALLQ[id]});
+  var lv=LEVELS.filter(function(l){return String(l.id)===k})[0];return lv?lv.qs:[];
+}
+function cuPool(){var p=[];Object.keys(CU.sel).forEach(function(k){if(CU.sel[k])p=p.concat(bankList(k))});return p}
+function renderCustom(){
+  var banks=LEVELS.map(function(l){return [String(l.id),l.part+' · '+l.name]}).concat([['law','法條辨識'],['wrong','錯題本']]);
+  var total=cuPool().length;
+  var ns=[10,15,20,30,0];
+  app.innerHTML='<div class="qhead"><button class="link" type="button" data-act="home">← 回地圖</button></div>'+
+  '<h2 class="sec">自選練習 <small>自己決定題庫與題數</small></h2>'+
+  '<div class="pickbox"><h3>題庫（可複選）</h3>'+
+  banks.map(function(b){var c=bankList(b[0]).length,on=!!CU.sel[b[0]];
+    return '<button class="pk'+(on?' on':'')+'" type="button" data-act="ctoggle" data-k="'+b[0]+'" aria-pressed="'+on+'"><span class="box">'+(on?'✓':'')+'</span><span>'+b[1]+'</span><em>'+c+' 題</em></button>'}).join('')+
+  '<div class="acts" style="margin-top:8px"><button class="btn ghost" type="button" data-act="call">全選</button><button class="btn ghost" type="button" data-act="cnone">全不選</button></div></div>'+
+  '<div class="pickbox"><h3>題數</h3><div class="nrow">'+
+  ns.map(function(n){var on=CU.n===n;return '<button class="pk nn'+(on?' on':'')+'" type="button" data-act="cn" data-n="'+n+'" aria-pressed="'+on+'">'+(n?n+' 題':'全部')+'</button>'}).join('')+'</div></div>'+
+  '<p class="note">目前選取題庫共 '+total+' 題，本輪將出 '+(CU.n?Math.min(CU.n,total):total)+' 題。自選練習沒有愛心限制，答錯的題目一樣會進錯題本。</p>'+
+  '<div class="acts"><button class="btn" type="button" data-act="cstart"'+(total?'':' disabled')+'>開始練習</button></div>';
+}
+function startCustom(){
+  var pool=shuffle(cuPool());if(!pool.length)return;
+  var list=CU.n?pool.slice(0,CU.n):pool;
+  R={mode:'custom',lv:null,list:list,i:0,hearts:null,correct:0,miss:0,streak:0,xp:0,misses:[],answered:false};
+  renderQ();
 }
 
 /* ---------- 計算挑戰 ---------- */
@@ -670,8 +710,13 @@ var H={
   mL:function(b){pickMatch('L',+b.dataset.i)},
   mR:function(b){pickMatch('R',+b.dataset.i)},
   next:nextQ,
-  again:function(){if(R&&R.mode==='law')startRun('law',null);else if(R&&R.lv)startRun('level',R.lv)},
+  again:function(){if(R&&R.mode==='custom')startCustom();else if(R&&R.mode==='law')startRun('law',null);else if(R&&R.lv)startRun('level',R.lv)},
   law:function(){startRun('law',null)},
+  custom:renderCustom,cstart:startCustom,
+  ctoggle:function(b){var k=b.dataset.k;CU.sel[k]=CU.sel[k]?0:1;renderCustom()},
+  call:function(){Object.keys(CU.sel).forEach(function(k){CU.sel[k]=1});renderCustom()},
+  cnone:function(){Object.keys(CU.sel).forEach(function(k){CU.sel[k]=0});renderCustom()},
+  cn:function(b){CU.n=+b.dataset.n;renderCustom()},
   cnext:calcNext,
   flip:function(){D.back=!D.back;renderCard()},
   cprev:function(){cardMove(-1)},
